@@ -1,0 +1,102 @@
+/* Home.css */
+.home {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  min-height: calc(100vh - 160px);
+  text-align: center;
+  background: linear-gradient(135deg, #e0f7fa, #80deea);
+}
+
+.content {
+  max-width: 800px;
+  z-index: 2;
+  animation: fadeIn 1s ease-in-out;
+}
+
+.title {
+  font-size: clamp(2rem, 5vw, 3rem);
+  color: #00695c;
+  margin-bottom: 1rem;
+  animation: slideInDown 1s ease-out;
+}
+
+.subtitle {
+  font-size: clamp(1rem, 3vw, 1.5rem);
+  color: #004d40;
+  margin-bottom: 1rem;
+  animation: fadeInUp 1s 0.5s ease-out both;
+}
+
+.tagline {
+  font-size: clamp(1rem, 3vw, 1.2rem);
+  color: #00796b;
+  font-style: italic;
+  margin-bottom: 2rem;
+  animation: fadeInUp 1s 0.7s ease-out both;
+}
+
+.btn {
+  display: inline-block;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  border: none;
+  border-radius: 8px;
+  text-decoration: none;
+  cursor: pointer;
+  opacity: 0;
+  animation: fadeIn 1s 1s ease-out forwards;
+}
+
+.btn-primary {
+  background-color: #00796b;
+  color: #fff;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.btn-primary:hover {
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+/* Animated wave shape at bottom */
+.water-wave {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 150px;
+  background: #e0f7fa;
+  border-radius: 50% 50% 0 0;
+  animation: bounceWave 6s ease-in-out infinite;
+  z-index: 1;
+}
+
+@keyframes slideInDown {
+  0% { transform: translateY(-100px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes fadeInUp {
+  0% { transform: translateY(50px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes fadeIn {
+  to { opacity: 1; }
+}
+
+@keyframes bounceWave {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(20px); }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .home { padding: 3rem 1rem; }
+  .water-wave { height: 100px; }
+}

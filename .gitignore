@@ -1,0 +1,29 @@
+# Python virtualenv
+env/
+ven/
+__pycache__/
+*.py[cod]
+*.sqlite3
+*.log
+
+# Django
+*.env
+*.pot
+*.pyc
+media/
+staticfiles/
+db.sqlite3
+
+# Node / React
+meter-logger-frontend/node_modules/
+meter-logger-frontend/build/
+meter-logger-frontend/.env
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# IDEs and OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
