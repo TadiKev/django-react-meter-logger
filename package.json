@@ -1,0 +1,8 @@
+{
+  "name": "django-react-meter-logger-root",
+  "version": "1.0.0",
+  "scripts": {
+    // Heroku will run this after installing root deps
+    "heroku-postbuild": "npm install --prefix meter-logger-frontend && npm run build --prefix meter-logger-frontend"
+  }
+}
