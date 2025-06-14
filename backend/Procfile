@@ -1,1 +1,1 @@
-﻿web: gunicorn meterdatalogger.wsgi --log-file -
+web: gunicorn meterdatalogger.wsgi --log-file -
