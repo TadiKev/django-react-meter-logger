@@ -2,6 +2,7 @@
   "name": "django-react-meter-logger-root",
   "version": "1.0.0",
   "scripts": {
-    "heroku-postbuild": "npm install --prefix frontend && npm run build --prefix frontend"
+    
+    "heroku-postbuild": "npm install --prefix frontend --legacy-peer-deps && npm run build --prefix frontend"
   }
 }
