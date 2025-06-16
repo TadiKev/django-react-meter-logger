@@ -1,24 +1,85 @@
+# ====================
 # Logs
+# ====================
 logs
 *.log
 npm-debug.log*
 yarn-debug.log*
-yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
+# ====================
+# Dependency directories
+# ====================
+/node_modules
+/frontend/node_modules
+
+# ====================
+# Build output
+# ====================
+# Ignore any dist folders by default…
 dist
 dist-ssr
-*.local
 
-# Editor directories and files
-.vscode/*
-!.vscode/extensions.json
-.idea
-.DS_Store
+# …but explicitly keep your React build
+!/frontend/dist/
+
+# ====================
+# Python artifacts
+# ====================
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+venv/
+ENV/
+env/
+.env/
+.venv/
+
+# SQLite database
+*.sqlite3
+
+# ====================
+# Environment files
+# ====================
+# Django (and decouple) env files
+.env
+.env.*
+
+# ====================
+# IDEs and editors
+# ====================
+.vscode/
+.idea/
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
