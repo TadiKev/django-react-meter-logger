@@ -33,7 +33,7 @@ REST_FRAMEWORK = {
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',        # must come right after SecurityMiddleware
     'corsheaders.middleware.CorsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -48,7 +48,7 @@ ROOT_URLCONF = 'meterdatalogger.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [],   # you can add BASE_DIR / "templates" here if you create a templates/ folder
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -61,13 +61,6 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'meterdatalogger.wsgi.application'
-
-# CORS
-CORS_ALLOWED_ORIGINS = config(
-    'CORS_ALLOWED_ORIGINS',
-    default='http://localhost:5173',
-    cast=Csv()
-)
 
 # Database: local via env vars, on Heroku via DATABASE_URL
 if os.getenv('DATABASE_URL'):
@@ -102,11 +95,26 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
 
+# Static files (CSS, JavaScript, Images)
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
-STATICFILES_DIRS = [BASE_DIR / 'frontend' / 'build' / 'static']
+
+# Point to your Vite build output (dist/) not a build/static folder
+STATICFILES_DIRS = [
+    BASE_DIR / 'frontend' / 'dist',
+]
+
+# Use WhiteNoise to serve static files efficiently
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+# CORS
+CORS_ALLOWED_ORIGINS = config(
+    'CORS_ALLOWED_ORIGINS',
+    default='http://localhost:5173',
+    cast=Csv()
+)
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# If you’re behind a proxy (Heroku), this ensures request.is_secure() works
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
