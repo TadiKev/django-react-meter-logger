@@ -1,43 +1,40 @@
 // src/components/MeterReadingSystem.jsx
 
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import styles from './MeterReadingSheet.module.css';
-import api from '../api';
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import styles from "./MeterReadingSheet.module.css";
+import api from "../api";
 
 const MeterReadingSystem = () => {
-  const [userName, setUserName] = useState('');
+  const [userName, setUserName] = useState("");
   const [setupRequired, setSetupRequired] = useState(false);
   const [suburbs, setSuburbs] = useState([]);
+  const [temp, setTemp] = useState({
+    name: "",
+    date: "",
+    suburbId: "",
+    sequenceStart: "",
+    sequenceEnd: ""
+  });
   const [currentSession, setCurrentSession] = useState({
     id: null,
-    date: '',
-    suburbId: '',
-    suburbName: '',
-    sequenceStart: '',
-    sequenceEnd: '',
-    readings: [{ standNumber: '', readingText: '' }],
-  });
-
-  // Temp state for setup modal
-  const [temp, setTemp] = useState({
-    name: '',
-    date: '',
-    suburbId: '',
-    sequenceStart: '',
-    sequenceEnd: '',
+    date: "",
+    suburbId: "",
+    suburbName: "",
+    sequenceStart: "",
+    sequenceEnd: "",
+    readings: [{ standNumber: "", readingText: "" }]
   });
 
   const navigate = useNavigate();
 
-  // Fetch suburbs and load session metadata
   useEffect(() => {
-    api.get('/suburbs/')
+    api.get("/suburbs/")
       .then(res => setSuburbs(res.data))
-      .catch(err => console.error(err));
+      .catch(console.error);
 
-    const storedName = localStorage.getItem('readerName');
-    const storedMeta = JSON.parse(localStorage.getItem('sessionMeta') || 'null');
+    const storedName = localStorage.getItem("readerName");
+    const storedMeta = JSON.parse(localStorage.getItem("sessionMeta") || "null");
 
     if (storedName && storedMeta) {
       setUserName(storedName);
@@ -47,10 +44,10 @@ const MeterReadingSystem = () => {
         suburbId: storedMeta.suburbId,
         suburbName: storedMeta.suburbName,
         sequenceStart: storedMeta.sequenceStart,
-        sequenceEnd: storedMeta.sequenceEnd,
+        sequenceEnd: storedMeta.sequenceEnd
       }));
 
-      api.get('sessions/', { params: { date: storedMeta.date } })
+      api.get("/sessions/", { params: { date: storedMeta.date } })
         .then(res => {
           const found = res.data.find(
             sess => sess.reader_name === storedName && sess.date === storedMeta.date
@@ -60,13 +57,13 @@ const MeterReadingSystem = () => {
               id: found.id,
               date: found.date,
               suburbId: String(found.suburb),
-              suburbName: suburbs.find(s => s.id === found.suburb)?.name || '',
+              suburbName: suburbs.find(s => s.id === found.suburb)?.name || "",
               sequenceStart: String(found.sequence_start),
               sequenceEnd: String(found.sequence_end),
               readings: found.readings.map(r => ({
                 standNumber: r.stand_number,
-                readingText: String(r.consumption),
-              })),
+                readingText: String(r.consumption)
+              }))
             });
           }
         })
@@ -76,7 +73,6 @@ const MeterReadingSystem = () => {
     }
   }, []);
 
-  // Handlers for setup modal
   const handleTempChange = (key, value) => {
     setTemp(prev => ({ ...prev, [key]: value }));
   };
@@ -84,13 +80,13 @@ const MeterReadingSystem = () => {
   const saveSetup = () => {
     const { name, date, suburbId, sequenceStart, sequenceEnd } = temp;
     if (!name || !date || !suburbId || !sequenceStart || !sequenceEnd) {
-      alert('Please fill all setup fields.');
+      alert("Please fill all setup fields.");
       return;
     }
-    const suburbName = suburbs.find(s => String(s.id) === suburbId)?.name || '';
-    localStorage.setItem('readerName', name);
+    const suburbName = suburbs.find(s => String(s.id) === suburbId)?.name || "";
+    localStorage.setItem("readerName", name);
     localStorage.setItem(
-      'sessionMeta',
+      "sessionMeta",
       JSON.stringify({ date, suburbId, suburbName, sequenceStart, sequenceEnd })
     );
     setUserName(name);
@@ -100,47 +96,60 @@ const MeterReadingSystem = () => {
       suburbId,
       suburbName,
       sequenceStart,
-      sequenceEnd,
+      sequenceEnd
     }));
     setSetupRequired(false);
   };
 
-  // Reading row handlers
-  const handleReadingChange = (idx, key, val) =>
+  const handleReadingChange = (idx, key, val) => {
     setCurrentSession(s => ({
       ...s,
       readings: s.readings.map((r, i) =>
         i === idx ? { ...r, [key]: val } : r
-      ),
+      )
     }));
+  };
 
-  const addReadingRow = () =>
+  const addReadingRow = () => {
     setCurrentSession(s => ({
       ...s,
-      readings: [...s.readings, { standNumber: '', readingText: '' }],
+      readings: [...s.readings, { standNumber: "", readingText: "" }]
     }));
+  };
 
-  const prepareForNext = () => addReadingRow();
+  const prepareForNext = () => {
+    addReadingRow();
+  };
 
-  // Save or update session
   const saveSession = async () => {
-    const { id, date, suburbId, sequenceStart, sequenceEnd, readings } = currentSession;
+    const {
+      id,
+      date,
+      suburbId,
+      sequenceStart,
+      sequenceEnd,
+      readings
+    } = currentSession;
+
     const base = {
       date,
       suburb: parseInt(suburbId, 10),
       sequence_start: parseInt(sequenceStart, 10),
-      sequence_end: parseInt(sequenceEnd, 10),
+      sequence_end: parseInt(sequenceEnd, 10)
     };
+
     let payload;
     if (id) {
       const last = readings[readings.length - 1];
       payload = {
         ...base,
-        readings: [{
-          stand_number: last.standNumber,
-          consumption: parseFloat(last.readingText),
-          status: 'normal',
-        }],
+        readings: [
+          {
+            stand_number: last.standNumber,
+            consumption: parseFloat(last.readingText),
+            status: "normal"
+          }
+        ]
       };
     } else {
       payload = {
@@ -148,34 +157,34 @@ const MeterReadingSystem = () => {
         readings: readings.map(r => ({
           stand_number: r.standNumber,
           consumption: parseFloat(r.readingText),
-          status: 'normal',
-        })),
+          status: "normal"
+        }))
       };
     }
+
     try {
       const res = id
         ? await api.put(`sessions/${id}/`, payload)
-        : await api.post('sessions/', payload);
+        : await api.post("sessions/", payload);
       const saved = res.data;
       setCurrentSession(s => ({
         ...s,
         id: saved.id,
         readings: saved.readings.map(r => ({
           standNumber: r.stand_number,
-          readingText: String(r.consumption),
-        })),
+          readingText: String(r.consumption)
+        }))
       }));
-      alert(`Session ${id ? 'updated' : 'saved'} successfully!`);
+      alert(`Session ${id ? "updated" : "saved"} successfully!`);
       prepareForNext();
     } catch (err) {
       console.error(err);
-      alert('Error saving session');
+      alert("Error saving session");
     }
   };
 
-  const goToSessionList = () => navigate('/sessions');
+  const goToSessionList = () => navigate("/sessions");
 
-  // Setup modal
   if (setupRequired) {
     return (
       <div className={styles.nameModal}>
@@ -187,7 +196,7 @@ const MeterReadingSystem = () => {
               type="text"
               placeholder="Your name"
               value={temp.name}
-              onChange={e => handleTempChange('name', e.target.value)}
+              onChange={e => handleTempChange("name", e.target.value)}
             />
           </div>
           <div className={styles.field}>
@@ -195,21 +204,23 @@ const MeterReadingSystem = () => {
             <input
               type="date"
               value={temp.date}
-              onChange={e => handleTempChange('date', e.target.value)}
+              onChange={e => handleTempChange("date", e.target.value)}
             />
           </div>
           <div className={styles.field}>
             <label>Suburb *</label>
             <select
               value={temp.suburbId}
-              onChange={e => handleTempChange('suburbId', e.target.value)}
+              onChange={e => handleTempChange("suburbId", e.target.value)}
             >
               <option value="">Select suburb</option>
-              {suburbs.map(s => (
-                <option key={s.id} value={s.id}>
-                  {s.name}
-                </option>
-              ))}
+              {Array.isArray(suburbs)
+                ? suburbs.map(s => (
+                    <option key={s.id} value={s.id}>
+                      {s.name}
+                    </option>
+                  ))
+                : null}
             </select>
           </div>
           <div className={styles.fieldGroup}>
@@ -218,7 +229,9 @@ const MeterReadingSystem = () => {
               <input
                 type="number"
                 value={temp.sequenceStart}
-                onChange={e => handleTempChange('sequenceStart', e.target.value)}
+                onChange={e =>
+                  handleTempChange("sequenceStart", e.target.value)
+                }
               />
             </div>
             <div className={styles.field}>
@@ -226,7 +239,9 @@ const MeterReadingSystem = () => {
               <input
                 type="number"
                 value={temp.sequenceEnd}
-                onChange={e => handleTempChange('sequenceEnd', e.target.value)}
+                onChange={e =>
+                  handleTempChange("sequenceEnd", e.target.value)
+                }
               />
             </div>
           </div>
@@ -238,7 +253,6 @@ const MeterReadingSystem = () => {
     );
   }
 
-  // Main UI
   return (
     <div className={styles.container}>
       <section className={styles.main}>
@@ -249,14 +263,27 @@ const MeterReadingSystem = () => {
             <span>Reader: <strong>{userName}</strong></span>
             <span>Date: <strong>{currentSession.date}</strong></span>
             <span>Suburb: <strong>{currentSession.suburbName}</strong></span>
-            <span>Seq: <strong>{currentSession.sequenceStart}–{currentSession.sequenceEnd}</strong></span>
-            <button className={styles.editName} onClick={() => setSetupRequired(true)}>
+            <span>
+              Seq: <strong>
+                {currentSession.sequenceStart}–{currentSession.sequenceEnd}
+              </strong>
+            </span>
+            <button
+              className={styles.editName}
+              onClick={() => setSetupRequired(true)}
+            >
               Edit Setup
             </button>
           </div>
         </header>
 
-        <form className={styles.form} onSubmit={e => { e.preventDefault(); saveSession(); }}>
+        <form
+          className={styles.form}
+          onSubmit={e => {
+            e.preventDefault();
+            saveSession();
+          }}
+        >
           <div className={styles.readingsSection}>
             <h3>Readings</h3>
             <table className={styles.table}>
@@ -264,39 +291,54 @@ const MeterReadingSystem = () => {
                 <tr><th>Stand #</th><th>Reading</th></tr>
               </thead>
               <tbody>
-                {currentSession.readings.map((r, i) => (
-                  <tr key={i}>
-                    <td>
-                      <input
-                        value={r.standNumber}
-                        placeholder="Stand#"
-                        onChange={e => handleReadingChange(i, 'standNumber', e.target.value)}
-                      />
-                    </td>
-                    <td>
-                      <input
-                        value={r.readingText}
-                        placeholder="Reading"
-                        onChange={e => handleReadingChange(i, 'readingText', e.target.value)}
-                      />
-                    </td>
-                  </tr>
-                ))}
+                {Array.isArray(currentSession.readings)
+                  ? currentSession.readings.map((r, i) => (
+                      <tr key={i}>
+                        <td>
+                          <input
+                            value={r.standNumber}
+                            placeholder="Stand#"
+                            onChange={e =>
+                              handleReadingChange(i, "standNumber", e.target.value)
+                            }
+                          />
+                        </td>
+                        <td>
+                          <input
+                            value={r.readingText}
+                            placeholder="Reading"
+                            onChange={e =>
+                              handleReadingChange(i, "readingText", e.target.value)
+                            }
+                          />
+                        </td>
+                      </tr>
+                    ))
+                  : null}
               </tbody>
             </table>
-            <button type="button" className={styles.addRowBtn} onClick={addReadingRow}>
+            <button
+              type="button"
+              className={styles.addRowBtn}
+              onClick={addReadingRow}
+            >
               + Add Row
             </button>
           </div>
 
           <div className={styles.actions}>
             <button type="submit" className={styles.primaryBtn}>
-              {currentSession.id ? 'Update Session' : 'Save Session'}
+              {currentSession.id ? "Update Session" : "Save Session"}
             </button>
             <button
               type="button"
               className={styles.secondaryBtn}
-              onClick={() => setCurrentSession(s => ({ ...s, readings: [{ standNumber: '', readingText: '' }] }))}
+              onClick={() =>
+                setCurrentSession(s => ({
+                  ...s,
+                  readings: [{ standNumber: "", readingText: "" }]
+                }))
+              }
             >
               Clear
             </button>
