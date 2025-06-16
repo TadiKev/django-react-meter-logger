@@ -5,10 +5,18 @@ import dj_database_url
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# SECURITY
 SECRET_KEY = config('SECRET_KEY')
-DEBUG = config('DEBUG', default=False, cast=bool)
-ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='', cast=Csv())
+DEBUG      = config('DEBUG', default=False, cast=bool)
 
+# Allow your Heroku app’s domain (and any local hosts you need)
+ALLOWED_HOSTS = config(
+    'ALLOWED_HOSTS',
+    default='localhost,127.0.0.1,data-logger-backend-f1a598543523.herokuapp.com',
+    cast=Csv()
+)
+
+# Application definition
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -33,7 +41,7 @@ REST_FRAMEWORK = {
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',        # must come right after SecurityMiddleware
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -48,7 +56,7 @@ ROOT_URLCONF = 'meterdatalogger.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-         'DIRS': [ BASE_DIR / 'frontend' / 'dist' ],   
+        'DIRS': [ BASE_DIR / 'frontend' / 'dist' ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -62,7 +70,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'meterdatalogger.wsgi.application'
 
-# Database: local via env vars, on Heroku via DATABASE_URL
+# Database
 if os.getenv('DATABASE_URL'):
     DATABASES = {
         'default': dj_database_url.parse(
@@ -74,12 +82,12 @@ if os.getenv('DATABASE_URL'):
 else:
     DATABASES = {
         'default': {
-            'ENGINE': 'django.db.backends.postgresql',
-            'NAME': config('DB_NAME'),
-            'USER': config('DB_USER'),
+            'ENGINE':   'django.db.backends.postgresql',
+            'NAME':     config('DB_NAME'),
+            'USER':     config('DB_USER'),
             'PASSWORD': config('DB_PASSWORD'),
-            'HOST': config('DB_HOST', default='localhost'),
-            'PORT': config('DB_PORT', default='5432'),
+            'HOST':     config('DB_HOST', default='localhost'),
+            'PORT':     config('DB_PORT', default='5432'),
         }
     }
 
@@ -91,20 +99,14 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 LANGUAGE_CODE = 'en-us'
-TIME_ZONE = 'UTC'
-USE_I18N = True
-USE_TZ = True
+TIME_ZONE     = 'UTC'
+USE_I18N      = True
+USE_TZ        = True
 
-# Static files (CSS, JavaScript, Images)
+# Static files
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
-
-# Point to your Vite build output (dist/) not a build/static folder
-STATICFILES_DIRS = [
-    BASE_DIR / 'frontend' / 'dist',
-]
-
-# Use WhiteNoise to serve static files efficiently
+STATICFILES_DIRS = [ BASE_DIR / 'frontend' / 'dist' ]
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # CORS
@@ -116,5 +118,5 @@ CORS_ALLOWED_ORIGINS = config(
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# If you’re behind a proxy (Heroku), this ensures request.is_secure() works
+# Support secure proxy headers (Heroku)
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
