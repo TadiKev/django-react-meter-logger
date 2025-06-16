@@ -1,61 +1,28 @@
 from rest_framework import serializers
-from django.contrib.auth.models import User
-from .models import Suburb, MeterReadingSession, Reading, Reader
-
-class SuburbSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Suburb
-        fields = ['id', 'name']
+from .models import MeterReadingSession, Reading, Suburb
 
 class ReadingSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Reading
-        fields = ['id', 'session', 'stand_number', 'consumption', 'status']
+        model  = Reading
+        fields = ['stand_number', 'consumption', 'status']
 
 class MeterReadingSessionSerializer(serializers.ModelSerializer):
-    # Nested readings: read-only by default; for writes you can accept list of readings if desired.
-    readings = ReadingSerializer(many=True, read_only=True)
-    # Optionally allow creating readings inline:
-    # readings = ReadingSerializer(many=True, required=False)
+    reader_name    = serializers.CharField(source='reader.username', read_only=True)
+    suburb         = serializers.PrimaryKeyRelatedField(queryset=Suburb.objects.all())
+    readings       = ReadingSerializer(many=True)
 
     class Meta:
-        model = MeterReadingSession
+        model  = MeterReadingSession
         fields = [
-            'id',
-            'reader',
-            'date',
-            'suburb',
-            'sequence_start',
-            'sequence_end',
+            'id', 'reader_name', 'date',
+            'suburb', 'sequence_start', 'sequence_end',
             'readings',
         ]
 
-    # If you want to allow nested create/update of readings, override create/update:
-    # def create(self, validated_data):
-    #     readings_data = validated_data.pop('readings', [])
-    #     session = super().create(validated_data)
-    #     for rd in readings_data:
-    #         Reading.objects.create(session=session, **rd)
-    #     return session
-
-class UserSerializer(serializers.ModelSerializer):
-    # For Reader proxy: list sessions?
-    sessions = serializers.PrimaryKeyRelatedField(
-        many=True,
-        read_only=True,
-        source='meterreadingsession_set'  # or related_name if set
-    )
-    class Meta:
-        model = User
-        fields = ['id', 'username', 'email', 'sessions']
-
-class ReaderSerializer(serializers.ModelSerializer):
-    # As proxy, but same as UserSerializer; can customize if needed.
-    sessions = serializers.PrimaryKeyRelatedField(
-        many=True,
-        read_only=True,
-        source='meterreadingsession_set'
-    )
-    class Meta:
-        model = Reader
-        fields = ['id', 'username', 'email', 'sessions']
+    def create(self, validated_data):
+        # Not used—handled in view—but kept for completeness
+        readings_data = validated_data.pop('readings')
+        session = MeterReadingSession.objects.create(**validated_data)
+        for r in readings_data:
+            Reading.objects.create(session=session, **r)
+        return session
