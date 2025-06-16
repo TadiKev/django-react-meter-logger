@@ -29,15 +29,25 @@ const MeterReadingSystem = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    // Fetch suburbs list
     api.get("/suburbs/")
       .then(res => setSuburbs(res.data))
       .catch(console.error);
 
+    // Load stored setup
     const storedName = localStorage.getItem("readerName");
     const storedMeta = JSON.parse(localStorage.getItem("sessionMeta") || "null");
 
     if (storedName && storedMeta) {
+      // Seed both currentSession and temp
       setUserName(storedName);
+      setTemp({
+        name: storedName,
+        date: storedMeta.date,
+        suburbId: storedMeta.suburbId,
+        sequenceStart: storedMeta.sequenceStart,
+        sequenceEnd: storedMeta.sequenceEnd
+      });
       setCurrentSession(s => ({
         ...s,
         date: storedMeta.date,
@@ -47,6 +57,7 @@ const MeterReadingSystem = () => {
         sequenceEnd: storedMeta.sequenceEnd
       }));
 
+      // Load existing session if any
       api.get("/sessions/", { params: { date: storedMeta.date } })
         .then(res => {
           const found = res.data.find(
@@ -64,6 +75,14 @@ const MeterReadingSystem = () => {
                 standNumber: r.stand_number,
                 readingText: String(r.consumption)
               }))
+            });
+            // also update temp in case user later edits
+            setTemp({
+              name: storedName,
+              date: found.date,
+              suburbId: String(found.suburb),
+              sequenceStart: String(found.sequence_start),
+              sequenceEnd: String(found.sequence_end)
             });
           }
         })
@@ -270,7 +289,16 @@ const MeterReadingSystem = () => {
             </span>
             <button
               className={styles.editName}
-              onClick={() => setSetupRequired(true)}
+              onClick={() => {
+                setTemp({
+                  name: userName,
+                  date: currentSession.date,
+                  suburbId: currentSession.suburbId,
+                  sequenceStart: currentSession.sequenceStart,
+                  sequenceEnd: currentSession.sequenceEnd
+                });
+                setSetupRequired(true);
+              }}
             >
               Edit Setup
             </button>
