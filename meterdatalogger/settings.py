@@ -48,7 +48,7 @@ ROOT_URLCONF = 'meterdatalogger.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],   # you can add BASE_DIR / "templates" here if you create a templates/ folder
+         'DIRS': [ BASE_DIR / 'frontend' / 'dist' ],   
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
